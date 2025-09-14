@@ -1612,7 +1612,7 @@
             const [config, proxies, characters, messages, transactions, currencies, schedules] = await Promise.all([
                 db.appConfig.get('main'), db.apiProxies.toArray(), db.aiCharacters.toArray(), db.messages.orderBy('timestamp').toArray(), db.transactions.orderBy('timestamp').toArray(), db.currencies.toArray(), db.schedules.toArray(),
             ]);
-            const baseConfig = { id: 'main', chatName: 'Cava记事本1.2.1beta', chatAvatar: DEFAULT_AVATAR, maxTokens: 4096, background: '', theme: 'default', userId: '', userGender: '', userBio: '', systemPromptSettings: DEFAULT_SYSTEM_PROMPTS };
+            const baseConfig = { id: 'main', chatName: '我的记事本', chatAvatar: DEFAULT_AVATAR, maxTokens: 4096, background: '', theme: 'default', userId: '', userGender: '', userBio: '', systemPromptSettings: DEFAULT_SYSTEM_PROMPTS };
             state.config = { ...baseConfig, ...config, systemPromptSettings: { ...DEFAULT_SYSTEM_PROMPTS, ...(config ? config.systemPromptSettings : {}) } };
             state.proxies = proxies; state.characters = characters; state.messages = messages; state.transactions = transactions; state.schedules = schedules || [];
             
@@ -3503,6 +3503,7 @@ if (typeFilter !== 'all') {
             const completedLong = [];
 
             state.schedules.forEach(s => {
+                // 这个分类逻辑保持不变
                 if (s.eventType === 'once') {
                     if (s.completed) {
                         completedOnce.push(s);
@@ -3517,11 +3518,30 @@ if (typeFilter !== 'all') {
             for (let i = 1; i <= 4; i++) {
                 const container = document.getElementById(`quadrant-${i}-items`);
                 container.innerHTML = '';
+
                 if (quadrants[i].length > 0) {
-                    quadrants[i].sort((a, b) => b.importance - a.importance).forEach(s => container.appendChild(createScheduleItemElement(s)));
-                } else { container.innerHTML = `<div class="empty-state">无</div>`; }
+                    // --- 这里是修改的核心 ---
+                    quadrants[i].sort((a, b) => {
+                        // 1. 按重要性降序排列 (值越大越靠前)
+                        const importanceDiff = b.importance - a.importance;
+                        if (importanceDiff !== 0) {
+                            return importanceDiff;
+                        }
+
+                        // 2. 如果重要性相同，则按截止日期升序排列 (日期越早越靠前)
+                        // 将 deadline 对象转换为时间戳，没有 deadline 的视为无穷大，排在最后
+                        const aDdlTime = a.deadline ? new Date(a.deadline.year, a.deadline.month - 1, a.deadline.day, a.deadline.hour || 0, a.deadline.minute || 0).getTime() : Infinity;
+                        const bDdlTime = b.deadline ? new Date(b.deadline.year, b.deadline.month - 1, b.deadline.day, b.deadline.hour || 0, b.deadline.minute || 0).getTime() : Infinity;
+
+                        return aDdlTime - bDdlTime;
+
+                    }).forEach(s => container.appendChild(createScheduleItemElement(s)));
+                } else { 
+                    container.innerHTML = `<div class="empty-state">无</div>`; 
+                }
             }
             
+            // 下面的已完成部分逻辑保持不变
             const completedContainer = document.getElementById('completed-items');
             completedContainer.innerHTML = '';
             
