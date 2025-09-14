@@ -1612,7 +1612,7 @@
             const [config, proxies, characters, messages, transactions, currencies, schedules] = await Promise.all([
                 db.appConfig.get('main'), db.apiProxies.toArray(), db.aiCharacters.toArray(), db.messages.orderBy('timestamp').toArray(), db.transactions.orderBy('timestamp').toArray(), db.currencies.toArray(), db.schedules.toArray(),
             ]);
-            const baseConfig = { id: 'main', chatName: 'Cava记事本1.0beta', chatAvatar: DEFAULT_AVATAR, maxTokens: 4096, background: '', theme: 'default', userId: '', userGender: '', userBio: '', systemPromptSettings: DEFAULT_SYSTEM_PROMPTS };
+            const baseConfig = { id: 'main', chatName: 'Cava记事本1.2.1beta', chatAvatar: DEFAULT_AVATAR, maxTokens: 4096, background: '', theme: 'default', userId: '', userGender: '', userBio: '', systemPromptSettings: DEFAULT_SYSTEM_PROMPTS };
             state.config = { ...baseConfig, ...config, systemPromptSettings: { ...DEFAULT_SYSTEM_PROMPTS, ...(config ? config.systemPromptSettings : {}) } };
             state.proxies = proxies; state.characters = characters; state.messages = messages; state.transactions = transactions; state.schedules = schedules || [];
             
@@ -2092,7 +2092,7 @@ document.querySelector('#message-action-menu .cancel-btn').addEventListener('cli
     if (!file) return;
     
     // 压缩图片
-    const compressedBase64 = await compressImage(file, 700, 0.6);
+    const compressedBase64 = await compressImage(file, 800, 0.8);
     
     const newMsg = { timestamp: Date.now(), role: 'user', content: compressedBase64, type: 'image' };
     const id = await db.messages.add(newMsg);
