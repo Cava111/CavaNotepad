@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Cava记事本1.2.1beta</title>
+    <title>Cava记事本1.2.2beta</title>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
@@ -2363,7 +2363,9 @@ async function compressImage(file, maxWidth = 800, quality = 0.7) {
                     content = (systemPromptSettings.pie || DEFAULT_SYSTEM_PROMPTS.pie).replace('{data}', msg.content);
                     msgTokens = content.length * 2;
                 } else {
-                    content = msg.content;
+                    // --- ！！！核心修改在这里！！！ ---
+                    // 我们把原始消息里的换行符 \n 替换成 <br> 文本，再发给 AI
+                    content = msg.content.replace(/\n/g, '<br>');
                     msgTokens = content.length * 2;
                 }
                 
